@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode.nobles;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveImpl;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 public class TrajectoryDrive {
     public final Trajectory standardCollect, standardPlace;
@@ -32,12 +34,26 @@ public class TrajectoryDrive {
 
     public void followCustomTrajectory(double driveDistance, double strafeDistance) {
         Pose2d initialPose = drive.getPoseEstimate();
-        drive.setPoseEstimate(new Pose2d());
+        drive.setPoseEstimate(new Pose2d(0, 0, drive.getPoseEstimate().getHeading()));
+
         Trajectory trajectory = drive.trajectoryBuilder(drive.getPoseEstimate())
-                .lineToConstantHeading(new Vector2d(driveDistance, strafeDistance))
+                .lineTo(new Vector2d(driveDistance, strafeDistance))
                 .build();
         drive.followTrajectory(trajectory);
-        drive.setPoseEstimate(initialPose);
+
+        drive.setPoseEstimate(new Pose2d(
+                initialPose.getX() + drive.getPoseEstimate().getX(),
+                initialPose.getY() + drive.getPoseEstimate().getY(),
+                drive.getPoseEstimate().getHeading()
+        )); // BIG CHANGE
+    }
+
+    public void turnToZeroHeading() {
+        TelemetryStatic.telemetry.addData("heading_before", drive.getPoseEstimate().getHeading());
+        TelemetryStatic.telemetry.update();
+        drive.turn(-drive.getPoseEstimate().getHeading());
+        TelemetryStatic.telemetry.addData("heading_after", drive.getPoseEstimate().getHeading());
+        TelemetryStatic.telemetry.update();
     }
 
     public Pose2d getPoseEstimate() {
