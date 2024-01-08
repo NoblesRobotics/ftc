@@ -3,34 +3,41 @@ package org.firstinspires.ftc.teamcode.nobles.swervetest;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.nobles.TelemetryStatic;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class SwerveServo {
+    private final double TOLERANCE = 0.02;
+    private final double REV_RATIO = 221 / 180.;
+
     public final CRServo servo;
     public final AnalogInput analog;
     public double refPosition;
 
     public int currentRevs = 0;
     public double currentPosition = 0, targetPosition = 0;
+    private final int index;
+    private double lastGoodSubrev = 0;
     public SwerveServo(HardwareMap hardwareMap, int index) {
+        this.index = index;
         servo = hardwareMap.get(CRServo.class, "servo" + index);
         analog = hardwareMap.get(AnalogInput.class, "analog" + index);
     }
 
     public void calibrate() {
         servo.setPower(0);
-        refPosition = currentPosition = targetPosition = getSubrev();
+        refPosition = currentPosition = targetPosition = lastGoodSubrev = getSubrev();
+        /*if (currentPosition < 0.333) state = ServoState.LOW;
+        else if (currentPosition < 0.666) state = ServoState.MID;
+        else state = ServoState.HIGH;*/
     }
 
     public void update() {
         updatePosition();
-
-        if (Math.abs(targetPosition - currentPosition) > 0.05) servo.setPower(-Math.signum(targetPosition - currentPosition) * 0.5);
+        if (Math.abs(targetPosition - currentPosition) > TOLERANCE) {
+            double velocity = Math.max(Math.min(Math.abs(targetPosition - currentPosition), 1), 0.125);
+            servo.setPower(-Math.signum(targetPosition - currentPosition) * velocity);
+        }
         else servo.setPower(0);
     }
 
@@ -40,7 +47,6 @@ public class SwerveServo {
         HIGH
     }
 
-    private double lastGoodSubrev = 0;
     public int badTimeout = 0;
     public ServoState state = ServoState.MID;
 
@@ -92,20 +98,21 @@ public class SwerveServo {
 
         double normal = -(b - a);
         double around = (1 - b) + a;
+
         if (Math.abs(normal) <= Math.abs(around)) return normal;
         else return around;
     }
 
     public double getAngle() {
-        return (currentPosition - refPosition) * 180.;
+        return (currentPosition - refPosition) / REV_RATIO * 180.;
     }
 
     public void setAngle(double degrees) {
         double position = degrees / 180.;
-        targetPosition = (position * 1.25) + refPosition;
+        targetPosition = (position * REV_RATIO) + refPosition;
     }
 
     public boolean isMoving() {
-        return Math.abs(targetPosition - currentPosition) > 0.05;
+        return Math.abs(targetPosition - currentPosition) > TOLERANCE;
     }
 }
