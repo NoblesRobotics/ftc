@@ -75,11 +75,15 @@ public class SwerveDriveImpl extends SwerveDrive {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
 
+    private boolean isDriving = false;
+
     public void setMotorPowers(double v0, double v1, double v2, double v3) {
         modules[0].setPower(v0);
         modules[1].setPower(v1);
         modules[2].setPower(v2);
         modules[3].setPower(v3);
+
+        isDriving = v0 != 0 || v1 != 0 || v2 != 0 || v3 != 0;
     }
 
     public void setModuleOrientations(double r0, double r1, double r2, double r3) {
@@ -87,6 +91,14 @@ public class SwerveDriveImpl extends SwerveDrive {
         modules[1].setAngle(Math.toDegrees(r1));
         modules[2].setAngle(Math.toDegrees(r2));
         modules[3].setAngle(Math.toDegrees(r3));
+
+        if (!isDriving) {
+            while (true) {
+                boolean isAnyBusy = false;
+                for (SwerveModule module : modules) isAnyBusy |= module.isServoMoving();
+                if (!isAnyBusy) break;
+            }
+        }
     }
 
     @NonNull
@@ -154,33 +166,3 @@ public class SwerveDriveImpl extends SwerveDrive {
         for (SwerveModule module : modules) module.calibrateServo();
     }
 }
-
-/*class SwerveModule {
-    public SwerveModule() {}
-
-    public void setPower(double power) {}
-
-    public void setOrientation(double targetOrientation) {
-        double error = subtractAngles(getOrientation(), targetOrientation), lastError = error, integralSum = 0;
-        ElapsedTime timer = new ElapsedTime();
-
-        while ((error = subtractAngles(getOrientation(), targetOrientation)) > 2) {
-            double derivative = (error - lastError) / timer.seconds();
-            integralSum += (error * timer.seconds());
-
-            double pidOut = servoCoefficients.p * error + servoCoefficients.i * integralSum + servoCoefficients.d * derivative;
-            servo.setPower(Math.signum(error) * pidOut);
-
-            lastError = error;
-            timer.reset();
-        }
-    }
-
-    public double getPosition() {
-        return DriveConstants.encoderTicksToInches(motor.getCurrentPosition());
-    }
-
-    public double getOrientation() {
-        return servoEncoder.getVoltage() / 3.3 * (2 * Math.PI);
-    }
-}*/

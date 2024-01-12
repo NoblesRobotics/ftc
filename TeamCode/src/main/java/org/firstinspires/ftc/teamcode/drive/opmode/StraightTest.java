@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveImpl;
+import org.firstinspires.ftc.teamcode.nobles.swervetest.SwerveDriveImpl;
 
 /*
  * This is a simple routine to test translational drive capabilities.
@@ -17,15 +18,15 @@ import org.firstinspires.ftc.teamcode.drive.MecanumDriveImpl;
 @Config
 @Autonomous(group = "drive")
 public class StraightTest extends LinearOpMode {
-    public static double DISTANCE = 60; // in
+    public static double DISTANCE = 30; // in
 
     @Override
     public void runOpMode() throws InterruptedException {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        MecanumDriveImpl drive = new MecanumDriveImpl(hardwareMap);
+        SwerveDriveImpl drive = new SwerveDriveImpl(hardwareMap);
 
-        Trajectory trajectory = drive.trajectoryBuilder(new Pose2d())
+        Trajectory trajectory = drive.trajectoryBuilder(new Pose2d(), 0)
                 .forward(DISTANCE)
                 .build();
 

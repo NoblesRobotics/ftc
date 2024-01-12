@@ -21,6 +21,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveImpl;
+import org.firstinspires.ftc.teamcode.nobles.swervetest.SwerveDriveImpl;
 
 import java.util.List;
 
@@ -73,7 +74,7 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
 
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        MecanumDriveImpl drive = new MecanumDriveImpl(hardwareMap);
+        SwerveDriveImpl drive = new SwerveDriveImpl(hardwareMap);
 
         Mode mode = Mode.TUNING_MODE;
 
@@ -82,7 +83,7 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
         double lastKd = MOTOR_VELO_PID.d;
         double lastKf = MOTOR_VELO_PID.f;
 
-        drive.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+        //drive.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
 
         NanoClock clock = NanoClock.system();
 
@@ -106,7 +107,7 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
                 case TUNING_MODE:
                     if (gamepad1.y) {
                         mode = Mode.DRIVER_MODE;
-                        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        //drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     }
 
                     // calculate and set the motor power
@@ -137,7 +138,7 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
                     break;
                 case DRIVER_MODE:
                     if (gamepad1.b) {
-                        drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        //drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
                         mode = Mode.TUNING_MODE;
                         movingForwards = true;
@@ -145,19 +146,19 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
                         profileStart = clock.seconds();
                     }
 
-                    drive.setWeightedDrivePower(
+                    /*drive.setWeightedDrivePower(
                             new Pose2d(
                                     -gamepad1.left_stick_y,
                                     -gamepad1.left_stick_x,
                                     -gamepad1.right_stick_x
                             )
-                    );
+                    );*/
                     break;
             }
 
             if (lastKp != MOTOR_VELO_PID.p || lastKd != MOTOR_VELO_PID.d
                     || lastKi != MOTOR_VELO_PID.i || lastKf != MOTOR_VELO_PID.f) {
-                drive.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+                //drive.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
 
                 lastKp = MOTOR_VELO_PID.p;
                 lastKi = MOTOR_VELO_PID.i;
