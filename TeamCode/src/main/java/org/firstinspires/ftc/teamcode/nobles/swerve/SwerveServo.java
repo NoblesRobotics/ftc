@@ -1,10 +1,8 @@
-package org.firstinspires.ftc.teamcode.nobles.swervetest;
+package org.firstinspires.ftc.teamcode.nobles.swerve;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.teamcode.nobles.TelemetryStatic;
 
 public class SwerveServo {
     private final double TOLERANCE = 0.02;
@@ -16,10 +14,8 @@ public class SwerveServo {
 
     public int currentRevs = 0;
     public double currentPosition = 0, targetPosition = 0;
-    private final int index;
     private double lastGoodSubrev = 0;
     public SwerveServo(HardwareMap hardwareMap, int index) {
-        this.index = index;
         servo = hardwareMap.get(CRServo.class, "servo" + index);
         analog = hardwareMap.get(AnalogInput.class, "analog" + index);
     }

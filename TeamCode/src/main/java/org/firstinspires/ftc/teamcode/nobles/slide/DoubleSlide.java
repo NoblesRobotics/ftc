@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.nobles.slidetest;
+package org.firstinspires.ftc.teamcode.nobles.slide;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class DoubleSlide {
-    private final int MAX_DIFFERENCE = 100;
+    private final int MAX_DIFFERENCE = 200;
     private final DcMotorEx slideA, slideB;
 
     public DoubleSlide(HardwareMap hardwareMap) {
@@ -32,13 +32,15 @@ public class DoubleSlide {
     public void setPosition(int position) {
         slideA.setTargetPosition(position);
         slideB.setTargetPosition(position);
+    }
 
-        while (slideA.isBusy() || slideB.isBusy()) {
-            if (Math.abs(slideA.getCurrentPosition() - slideB.getCurrentPosition()) > MAX_DIFFERENCE) {
-                slideA.setPower(0);
-                slideB.setPower(0);
-                while (true) Thread.yield();
-            }
+    public boolean isBusy() {
+        if (Math.abs(slideA.getCurrentPosition() - slideB.getCurrentPosition()) > MAX_DIFFERENCE) {
+            slideA.setPower(0);
+            slideB.setPower(0);
+            while (true) Thread.yield();
         }
+
+        return slideA.isBusy() || slideB.isBusy();
     }
 }

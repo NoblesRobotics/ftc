@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.nobles.swervetest;
+package org.firstinspires.ftc.teamcode.nobles.swerve;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -30,6 +30,11 @@ public class SwerveModule {
             powerSign = 1;
         }
         servo.setAngle(getClosestEquivalent(degrees));
+    }
+
+    public void resetAngle() {
+        powerSign = 1;
+        servo.setAngle(0);
     }
 
     public double getAngle() {

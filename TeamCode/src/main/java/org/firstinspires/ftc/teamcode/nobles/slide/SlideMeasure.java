@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.nobles.slidetest;
+package org.firstinspires.ftc.teamcode.nobles.slide;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

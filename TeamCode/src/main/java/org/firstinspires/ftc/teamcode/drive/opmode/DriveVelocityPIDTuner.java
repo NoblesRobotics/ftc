@@ -16,12 +16,10 @@ import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.MecanumDriveImpl;
-import org.firstinspires.ftc.teamcode.nobles.swervetest.SwerveDriveImpl;
 
 import java.util.List;
 
@@ -74,7 +72,7 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
 
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        SwerveDriveImpl drive = new SwerveDriveImpl(hardwareMap);
+        MecanumDriveImpl drive = new MecanumDriveImpl(hardwareMap);
 
         Mode mode = Mode.TUNING_MODE;
 

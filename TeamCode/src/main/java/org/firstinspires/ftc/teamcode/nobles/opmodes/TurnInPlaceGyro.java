@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.nobles.swervetest;
+package org.firstinspires.ftc.teamcode.nobles.opmodes;
 
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
@@ -12,12 +12,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.nobles.TelemetryStatic;
-import org.firstinspires.ftc.teamcode.nobles.slidetest.DoubleSlide;
+import org.firstinspires.ftc.teamcode.nobles.slide.DoubleSlide;
+import org.firstinspires.ftc.teamcode.nobles.swerve.SimpleIMU;
+import org.firstinspires.ftc.teamcode.nobles.swerve.SwerveModule;
 
 @TeleOp
-public class TurnInPlaceStates extends LinearOpMode {
+public class TurnInPlaceGyro extends LinearOpMode {
     @Override
     public void runOpMode() {
         TelemetryStatic.telemetry = telemetry;
@@ -51,16 +54,24 @@ public class TurnInPlaceStates extends LinearOpMode {
                 new Translation2d(-0.203, 0.203),
                 new Translation2d(-0.203, -0.203)
         );
-
-        DriveState driveState = DriveState.NOT_MOVING;
+        double forwardAngle = 0;
+        DriveStateA driveState = DriveStateA.NOT_MOVING;
 
         while (opModeIsActive()) {
+            double currentAngle = imu.getAngle();
+            //if (gamepad1.right_stick_x > 0) forwardAngle = currentAngle - 5;
+            //else if (gamepad1.right_stick_x < 0) forwardAngle = currentAngle + 5;
+            //forwardAngle += -gamepad1.right_stick_x * 2;
+
+            if (gamepad1.y) forwardAngle = currentAngle;
+
+            double turnFactor = -deltaAngle(forwardAngle, currentAngle) * 0.01;
             SwerveModuleState[] states = kinematics.toSwerveModuleStates(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                             -gamepad1.left_stick_y,
                             -gamepad1.left_stick_x,
-                            gamepad1.right_stick_x,
-                            Rotation2d.fromDegrees(imu.getAngle())
+                            gamepad1.right_stick_x != 0 ? gamepad1.right_stick_x : (Math.abs(turnFactor) > 0.1 ? Range.clip(turnFactor, -0.5, 0.5) : 0),
+                            Rotation2d.fromDegrees(currentAngle)
                     )
             );
 
@@ -69,7 +80,9 @@ public class TurnInPlaceStates extends LinearOpMode {
                 if (Math.abs(state.speedMetersPerSecond) > maxSpeed) maxSpeed = Math.abs(state.speedMetersPerSecond);
             }
 
-            boolean isAnyInput = gamepad1.left_stick_x > 0.25 || gamepad1.left_stick_y > 0.25 || gamepad1.right_stick_x > 0.25;
+            boolean isAnyInput = gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0 || gamepad1.right_stick_x != 0;
+            double magnitude = isAnyInput ? 1 : Math.abs(turnFactor);
+
             switch (driveState) {
                 case NOT_MOVING:
                     for (SwerveModule module : modules) {
@@ -77,7 +90,7 @@ public class TurnInPlaceStates extends LinearOpMode {
                         module.setPower(0);
                     }
 
-                    if (isAnyInput) driveState = DriveState.TURNING;
+                    if (isAnyInput) driveState = DriveStateA.TURNING;
                     break;
 
                 case TURNING:
@@ -89,25 +102,37 @@ public class TurnInPlaceStates extends LinearOpMode {
                         anyServoMoving |= modules[i].isServoMoving();
                     }
 
-                    if (!anyServoMoving) driveState = DriveState.DRIVING;
+                    if (!anyServoMoving) driveState = DriveStateA.DRIVING;
                     break;
 
                 case DRIVING:
                     for (int i = 0; i < 4; i++) {
                         modules[i].setAngle(states[servoToStateMap[i]].angle.getDegrees());
                         modules[i].updateServo();
-                        modules[i].setPower(states[servoToStateMap[i]].speedMetersPerSecond / maxSpeed); // DOES MAPPING APPLY???
+                        modules[i].setPower(states[servoToStateMap[i]].speedMetersPerSecond / maxSpeed * magnitude); // DOES MAPPING APPLY???
                     }
 
-                    if (!isAnyInput) driveState = DriveState.NOT_MOVING;
+                    if (!isAnyInput) driveState = DriveStateA.NOT_MOVING;
                     break;
             }
         }
     }
 
-    enum DriveState {
+    enum DriveStateA {
         NOT_MOVING,
         TURNING,
         DRIVING
+    }
+
+    private double deltaAngle(double aDeg, double bDeg) {
+        if (aDeg > bDeg) return -deltaAngle(bDeg, aDeg);
+
+        aDeg += 180.;
+        bDeg += 180.;
+        double normal = -(bDeg - aDeg);
+        double around = (360 - bDeg) + aDeg;
+
+        if (Math.abs(normal) <= Math.abs(around)) return normal;
+        else return around;
     }
 }
