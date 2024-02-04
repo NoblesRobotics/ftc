@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class SlideMeasure extends LinearOpMode {
     @Override
     public void runOpMode() {
-        DoubleSlide slide = new DoubleSlide(hardwareMap);
+        DoubleSlide slide = new DoubleSlide(hardwareMap, null);
         waitForStart();
         int target = 0;
         while (opModeIsActive()) {

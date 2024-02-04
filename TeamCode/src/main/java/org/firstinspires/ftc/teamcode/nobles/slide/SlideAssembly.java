@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.nobles.slide;
 
-import static java.lang.Thread.sleep;
-
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.nobles.AttributeTelemetry;
 
 public class SlideAssembly {
     private final DoubleSlide slide;
@@ -16,7 +16,7 @@ public class SlideAssembly {
     private final ActionQueuer actionQueuer = new ActionQueuer();
 
     public SlideAssembly(HardwareMap hardwareMap) {
-        slide = new DoubleSlide(hardwareMap);
+        slide = new DoubleSlide(hardwareMap, this);
         rightFlap = hardwareMap.get(Servo.class, "servo6");
         leftFlap = hardwareMap.get(Servo.class, "servo7");
         pivot = hardwareMap.get(Servo.class, "servo8");
@@ -39,31 +39,44 @@ public class SlideAssembly {
             );
         }
         flapsOpen = setToOpen;
+        AttributeTelemetry.set("Flaps", flapsOpen ? "Open" : "Closed");
     }
 
     public void raiseAssembly() {
+        raiseAssembly(2000);
+    }
+
+    public void raiseAssembly(int slidePosition) {
         if (flapsOpen) setFlaps(false);
         actionQueuer.add(
-                new ActionQueuer.SlideAction(slide, 2000),
+                new ActionQueuer.SlideAction(slide, slidePosition),
                 new ActionQueuer.ServoAction(pivot, 0.686, 500)
         );
     }
 
     public void lowerAssembly() {
+        lowerAssembly(0);
+    }
+
+    public void lowerAssembly(int slidePosition) {
         if (flapsOpen) setFlaps(false);
         actionQueuer.add(
                 new ActionQueuer.ServoAction(pivot, 0.453, 500),
-                new ActionQueuer.SlideAction(slide, 0)
+                new ActionQueuer.SlideAction(slide, slidePosition)
         );
         if (!flapsOpen) setFlaps(true);
-    }
-
-    public void updateActionQueuer() {
-        actionQueuer.update();
     }
 
     public void setIntakePower(double power) {
         intakeRoller.setPower(power);
         intake.setPower(-power);
+    }
+
+    public ActionQueuer getActionQueuer() {
+        return actionQueuer;
+    }
+
+    public DoubleSlide getSlide() {
+        return slide;
     }
 }

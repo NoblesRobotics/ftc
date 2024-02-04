@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.nobles.AttributeTelemetry;
+
 public class SwerveDrive {
     protected final SwerveModule[] modules;
     protected final SimpleIMU imu;
@@ -22,7 +24,10 @@ public class SwerveDrive {
         ElapsedTime timer = new ElapsedTime();
         while (timer.seconds() < 3) {
             for (SwerveModule module : modules) module.calibrateServo();
+            AttributeTelemetry.set("Calibration Time", String.valueOf(timer.seconds()));
         }
+        SwerveServoStorage.hasCachedPositions = true;
+        AttributeTelemetry.remove("Calibration Time");
     }
 
     public void resetServos() {

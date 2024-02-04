@@ -34,7 +34,7 @@ public class SwerveModule {
 
     public void resetAngle() {
         powerSign = 1;
-        servo.setAngle(0);
+        servo.setAngle(getClosestEquivalent(0));
     }
 
     public double getAngle() {

@@ -3,16 +3,24 @@ package org.firstinspires.ftc.teamcode.nobles.findblock;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.nobles.AttributeTelemetry;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+
 @TeleOp
 public class CameraTestOpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
-        BlockFinder blockFinder = new BlockFinder();
-        blockFinder.init(hardwareMap, true);
+        AttributeTelemetry.setTelemetry(telemetry);
+
+        BlockFinder blockFinder = new BlockFinder(hardwareMap, false);
+
         waitForStart();
+
         while (opModeIsActive()) {
-            telemetry.addData("position", blockFinder.getBlockPosition());
-            telemetry.update();
+            AttributeTelemetry.set("Block Detected", String.valueOf(blockFinder.isBlockDetected()));
         }
     }
 }

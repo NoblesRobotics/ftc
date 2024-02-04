@@ -3,13 +3,10 @@ package org.firstinspires.ftc.teamcode.nobles.swerve;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.nobles.TelemetryStatic;
-
 @TeleOp
 public class RatioMeasure extends LinearOpMode {
     @Override
     public void runOpMode() {
-        TelemetryStatic.telemetry = telemetry;
         SwerveServo servo = new SwerveServo(hardwareMap, 0);
 
         while (!isStarted()) servo.calibrate();

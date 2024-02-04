@@ -7,12 +7,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.nobles.AttributeTelemetry;
 import org.firstinspires.ftc.teamcode.nobles.SinglePress;
 import org.firstinspires.ftc.teamcode.nobles.slide.SlideAssembly;
+import org.firstinspires.ftc.teamcode.nobles.swerve.SwerveServoStorage;
 import org.firstinspires.ftc.teamcode.nobles.swerve.TeleOpSwerveDrive;
 
 @TeleOp
-public class TurnInPlace extends LinearOpMode {
+public class TurnInPlaceClearCache extends LinearOpMode {
     @Override
     public void runOpMode() {
+        SwerveServoStorage.hasCachedPositions = false;
         AttributeTelemetry.setTelemetry(telemetry);
 
         TeleOpSwerveDrive drive = new TeleOpSwerveDrive(hardwareMap);

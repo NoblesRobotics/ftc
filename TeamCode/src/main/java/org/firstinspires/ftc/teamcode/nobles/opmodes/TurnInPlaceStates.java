@@ -9,15 +9,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.nobles.TelemetryStatic;
 import org.firstinspires.ftc.teamcode.nobles.swerve.SwerveModule;
 
 @TeleOp
 public class TurnInPlaceStates extends LinearOpMode {
     @Override
     public void runOpMode() {
-        TelemetryStatic.telemetry = telemetry;
-
         SwerveModule[] modules = new SwerveModule[] {
                 new SwerveModule(hardwareMap, 0, DcMotorSimple.Direction.FORWARD),
                 new SwerveModule(hardwareMap, 1, DcMotorSimple.Direction.FORWARD),

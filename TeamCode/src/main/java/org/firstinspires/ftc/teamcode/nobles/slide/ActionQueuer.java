@@ -25,6 +25,18 @@ public class ActionQueuer {
         }
     }
 
+    public void clear() {
+        queue.clear();
+    }
+
+    public void idleOnBusy() {
+        update();
+        while (currentAction != null) {
+            update();
+            Thread.yield();
+        }
+    }
+
     public static class SlideAction implements Action {
         private final DoubleSlide slide;
         private final int position;

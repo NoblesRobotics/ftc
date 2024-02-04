@@ -30,7 +30,7 @@ public class AutoSwerveDrive extends SwerveDrive {
 
     private final double DRIVE_P = 10, DRIVE_HEADING_P = 0.1, DRIVE_MAX_TIME_S = 4;
 
-    public void drive(ErrorFunction errorFunction) {
+    public void drive(ErrorFunction errorFunction, double magnitude) {
         ElapsedTime timer = new ElapsedTime();
         int[] startPositions = readAllPositions();
         int[] imuAdjustSigns = getIMUAdjustSigns();
@@ -58,7 +58,7 @@ public class AutoSwerveDrive extends SwerveDrive {
             for (double driveError : driveErrors) avgDriveError += driveError / 4;
 
             for (int i = 0; i < 4; i++) {
-                double drivePower = Range.clip(driveErrors[i], -0.5, 0.5);
+                double drivePower = Range.clip(driveErrors[i], -magnitude, magnitude);
                 modules[i].setPower(drivePower /*+ imuAdjustMagnitude * imuAdjustSigns[i]*/);
                 modules[i].updateServo();
             }
@@ -78,28 +78,32 @@ public class AutoSwerveDrive extends SwerveDrive {
         setAngle(servoAngle);
     }
 
-    public void drive(double inches) {
+    public void drive(double inches, double magnitude) {
         double inchesFactored = inches;
         int targetDeltaTick = (int) (Math.abs(inchesFactored) / INCHES_PER_REV * TICKS_PER_REV);
         drive(deltaTicks -> {
             double[] errors = new double[4];
             for (int i = 0; i < 4; i++) errors[i] = (Math.signum(inchesFactored) * (targetDeltaTick - deltaTicks[i]) / targetDeltaTick) * DRIVE_P * 2;
             return errors;
-        });
+        }, magnitude);
     }
 
-    public void driveToDistance(double targetInches, double initialInches) {
-        double initialOffset = initialInches - targetInches;
+    public void drive(double inches) {
+        drive(inches, 0.5);
+    }
+
+    public void driveToDistance(double targetInches) {
+        double initialOffset = 12 - targetInches;
         drive(deltaTicks -> {
             double distance = distanceSensor.getDistance(DistanceUnit.INCH);
             double offset = distance - targetInches;
-            double error = (offset / initialOffset);
+            double error = Math.min(offset / initialOffset, 1);
             System.out.println(distance + " " + offset + " " + error);
 
             double[] errors = new double[4];
             for (int i = 0; i < 4; i++) errors[i] = error;
             return errors;
-        });
+        }, 0.7);
     }
 
     public interface ErrorFunction {

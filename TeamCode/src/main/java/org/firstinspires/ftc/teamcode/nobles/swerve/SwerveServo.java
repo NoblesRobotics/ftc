@@ -15,14 +15,24 @@ public class SwerveServo {
     public int currentRevs = 0;
     public double currentPosition = 0, targetPosition = 0;
     private double lastGoodSubrev = 0;
+    private final int index;
     public SwerveServo(HardwareMap hardwareMap, int index) {
         servo = hardwareMap.get(CRServo.class, "servo" + index);
         analog = hardwareMap.get(AnalogInput.class, "analog" + index);
+        this.index = index;
     }
 
     public void calibrate() {
         servo.setPower(0);
-        refPosition = currentPosition = targetPosition = lastGoodSubrev = getSubrev();
+        targetPosition = lastGoodSubrev = getSubrev();
+        if (SwerveServoStorage.hasCachedPositions) {
+            refPosition = SwerveServoStorage.refPositions[index];
+            currentRevs = SwerveServoStorage.currentRevs[index];
+        } else {
+            refPosition = SwerveServoStorage.refPositions[index] = lastGoodSubrev;
+            currentRevs = 0;
+        }
+        currentPosition = currentRevs + lastGoodSubrev;
         /*if (currentPosition < 0.333) state = ServoState.LOW;
         else if (currentPosition < 0.666) state = ServoState.MID;
         else state = ServoState.HIGH;*/
@@ -35,6 +45,7 @@ public class SwerveServo {
             servo.setPower(-Math.signum(targetPosition - currentPosition) * velocity);
         }
         else servo.setPower(0);
+        SwerveServoStorage.currentRevs[index] = currentRevs;
     }
 
     enum ServoState {

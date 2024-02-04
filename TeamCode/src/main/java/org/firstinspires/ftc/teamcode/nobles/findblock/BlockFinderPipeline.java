@@ -6,81 +6,57 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 public class BlockFinderPipeline extends OpenCvPipeline {
     private final boolean useRed;
-    private int blockPosition = -1;
-    private int colorThreshold = 255;
 
     public BlockFinderPipeline(boolean useRed) {
         this.useRed = useRed;
     }
 
-    public int getBlockPosition() {
-        return blockPosition;
+    public boolean isCapturing = false, blockDetected = false;
+
+    public void makeCapture() {
+        isCapturing = true;
     }
 
     @Override
     public Mat processFrame(Mat frame) {
+        if (isCapturing) {
+            blockDetected = isBlockDetected(frame);
+            isCapturing = false;
+        }
+
+        return frame;
+    }
+
+    private boolean isBlockDetected(Mat frame) {
         int targetChannel = useRed ? 0 : 2;
         int removedChannel = useRed ? 2 : 0;
 
-        double[][] filteredData = new double[frame.height()][frame.width()];
+        int sideRestriction = frame.width() / 5;
+        double[][] filteredData = new double[frame.height()][frame.width() - 2 * sideRestriction];
         for (int y = 0; y < frame.height(); y++) {
-            for (int x = 0; x < frame.width(); x++) {
+            for (int x = sideRestriction; x < frame.width() - sideRestriction; x++) {
                 double[] pixel = frame.get(y, x);
-                filteredData[y][x] = pixel[targetChannel] - (pixel[removedChannel] + pixel[1]) / 2;
+                filteredData[y][x - sideRestriction] = pixel[targetChannel] - (pixel[removedChannel] + pixel[1]) / 2;
             }
         }
+        int filteredDataSize = filteredData.length * filteredData[0].length;
 
-        int thirdWidth = frame.width() / 3;
-        int leftCount = countGreaterThan(filteredData, colorThreshold, 0, thirdWidth);
-        int middleCount = countGreaterThan(filteredData, colorThreshold, thirdWidth, 2 * thirdWidth);
-        int rightCount = countGreaterThan(filteredData, colorThreshold, 2 * thirdWidth, frame.width());
-
-        int[] maxMidArray = argMaxAndMid(leftCount, middleCount, rightCount);
-        int maxIndex = maxMidArray[0];
-        int midIndex = maxMidArray[1];
-        double[] counts = new double[] {leftCount, middleCount, rightCount};
-
-        double confidence = 0;
-        if (counts[maxIndex] > 0) confidence = (counts[maxIndex] - counts[midIndex]) / counts[maxIndex];
-
-        if (confidence > 0.5 || colorThreshold < 50) {
-            blockPosition = maxIndex;
-            colorThreshold += 10;
-        }
-        else colorThreshold -= 10;
-
-        Mat grayscaleMat = new Mat(frame.height(), frame.width(), CvType.CV_8U);
-        for (int y = 0; y < frame.height(); y++) {
-            for (int x = 0; x < frame.width(); x++) {
-                grayscaleMat.put(y, x, filteredData[y][x]);
+        int colorThreshold = 250, lastCountAboveThreshold = 0;
+        while (colorThreshold > 50) {
+            int countAboveThreshold = 0;
+            for (double[] row : filteredData) {
+                for (double pixel : row) {
+                    if (pixel > colorThreshold) countAboveThreshold++;
+                }
             }
-        }
-        return grayscaleMat;
-    }
 
-    private int countGreaterThan(double[][] data, double threshold, int x0, int x1) {
-        int sum = 0;
-        for (int y = 0; y < data.length; y++) {
-            for (int x = x0; x < x1; x++) {
-                if (data[y][x] > threshold) sum++;
+            if (countAboveThreshold > 0.05 * filteredDataSize && countAboveThreshold > 1.5 * lastCountAboveThreshold) {
+                return true;
             }
-        }
-        return sum;
-    }
 
-    private int[] argMaxAndMid(int a0, int a1, int a2) {
-        int[] arr = new int[] {a0, a1, a2};
-        int maxIndex = argMax(arr);
-        arr[maxIndex] = -1;
-        int midIndex = argMax(arr);
-        return new int[] {maxIndex, midIndex};
-    }
-
-    private int argMax(int[] arr) {
-        int maxIndex = 0;
-        for (int i = 1; i < arr.length; i++) {
-            if (arr[i] > arr[maxIndex]) maxIndex = i;
+            colorThreshold -= 5;
         }
-        return maxIndex;
+
+        return false;
     }
 }

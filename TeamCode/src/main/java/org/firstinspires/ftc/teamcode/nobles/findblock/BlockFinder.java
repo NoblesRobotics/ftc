@@ -9,10 +9,10 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 public class BlockFinder {
-    private OpenCvCamera camera;
-    private BlockFinderPipeline pipeline;
+    private final OpenCvCamera camera;
+    private final BlockFinderPipeline pipeline;
 
-    public void init(HardwareMap hardwareMap, boolean useRed) {
+    public BlockFinder(HardwareMap hardwareMap, boolean useRed) {
         WebcamName webcamName = hardwareMap.get(WebcamName.class, "camera");
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
@@ -23,7 +23,7 @@ public class BlockFinder {
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                camera.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                camera.startStreaming(544, 288, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
@@ -31,11 +31,9 @@ public class BlockFinder {
         });
     }
 
-    public int getBlockPosition() {
-        ElapsedTime timer = new ElapsedTime();
-        while (pipeline.getBlockPosition() == -1 && timer.seconds() < 3) Thread.yield();
-
-        //camera.stopStreaming();
-        return Math.max(pipeline.getBlockPosition(), 0);
+    public boolean isBlockDetected() {
+        pipeline.makeCapture();
+        while (pipeline.isCapturing) Thread.yield();
+        return pipeline.blockDetected;
     }
 }
