@@ -122,4 +122,8 @@ public class SwerveServo {
     public boolean isMoving() {
         return Math.abs(targetPosition - currentPosition) > TOLERANCE;
     }
+
+    public boolean isErrorMajor() {
+        return Math.abs(targetPosition - currentPosition) / REV_RATIO * 180. > 5;
+    }
 }

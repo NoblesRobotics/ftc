@@ -31,9 +31,9 @@ public class BlockFinder {
         });
     }
 
-    public boolean isBlockDetected() {
+    public int getBlockPosition() {
         pipeline.makeCapture();
         while (pipeline.isCapturing) Thread.yield();
-        return pipeline.blockDetected;
+        return pipeline.blockPosition;
     }
 }

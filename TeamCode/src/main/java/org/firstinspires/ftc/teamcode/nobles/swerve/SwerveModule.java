@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.nobles.swerve;
 
+import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveModuleState;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -57,10 +59,6 @@ public class SwerveModule {
         return motor.getCurrentPosition();
     }
 
-    public double getVelocity() {
-        return motor.getVelocity();
-    }
-
     private double getClosestEquivalent(double degrees) {
         double path = deltaAngle(degrees, normalizeAngle(servo.getAngle()));
         return servo.getAngle() + path;
@@ -83,5 +81,25 @@ public class SwerveModule {
 
         if (Math.abs(normal) <= Math.abs(around)) return normal;
         else return around;
+    }
+
+    private final double TICKS_PER_REV = 300, INCHES_PER_REV = Math.PI * 2.8, METERS_PER_INCH = 0.0254,
+        TICKS_PER_METER = TICKS_PER_REV / INCHES_PER_REV / METERS_PER_INCH,
+        METERS_PER_TICK = 1 / TICKS_PER_METER;
+
+    public double getVelocityMetersPerSecond() {
+        return motor.getVelocity() * powerSign * METERS_PER_TICK;
+    }
+
+    public void setVelocityMetersPerSecond(double metersPerSecond) {
+        motor.setVelocity(metersPerSecond * TICKS_PER_METER * powerSign);
+    }
+
+    public boolean isServoErrorMajor() {
+        return servo.isErrorMajor();
+    }
+
+    public SwerveModuleState getState() {
+        return new SwerveModuleState(getVelocityMetersPerSecond(), Rotation2d.fromDegrees(getAngle()));
     }
 }

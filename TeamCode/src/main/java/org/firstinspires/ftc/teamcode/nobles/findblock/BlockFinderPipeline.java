@@ -11,7 +11,9 @@ public class BlockFinderPipeline extends OpenCvPipeline {
         this.useRed = useRed;
     }
 
-    public boolean isCapturing = false, blockDetected = false;
+    public boolean isCapturing = false;
+
+    public int blockPosition = -1;
 
     public void makeCapture() {
         isCapturing = true;
@@ -20,43 +22,45 @@ public class BlockFinderPipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat frame) {
         if (isCapturing) {
-            blockDetected = isBlockDetected(frame);
+            blockPosition = getBlockPosition(frame);
             isCapturing = false;
         }
 
         return frame;
     }
 
-    private boolean isBlockDetected(Mat frame) {
+    private int getBlockPosition(Mat frame) {
         int targetChannel = useRed ? 0 : 2;
         int removedChannel = useRed ? 2 : 0;
 
-        int sideRestriction = frame.width() / 5;
-        double[][] filteredData = new double[frame.height()][frame.width() - 2 * sideRestriction];
+        double[][] filteredData = new double[frame.height()][frame.width()];
         for (int y = 0; y < frame.height(); y++) {
-            for (int x = sideRestriction; x < frame.width() - sideRestriction; x++) {
+            for (int x = 0; x < frame.width(); x++) {
                 double[] pixel = frame.get(y, x);
-                filteredData[y][x - sideRestriction] = pixel[targetChannel] - (pixel[removedChannel] + pixel[1]) / 2;
+                filteredData[y][x] = pixel[targetChannel] - (pixel[removedChannel] + pixel[1]) / 2;
             }
         }
-        int filteredDataSize = filteredData.length * filteredData[0].length;
+        int rowLength = filteredData[0].length;
+        int halfImageSize = filteredData.length * rowLength;
 
-        int colorThreshold = 250, lastCountAboveThreshold = 0;
+        int colorThreshold = 250, lastLeftCount = 0, lastRightCount = 0;
         while (colorThreshold > 50) {
-            int countAboveThreshold = 0;
+            int leftCount = 0, rightCount = 0;
             for (double[] row : filteredData) {
-                for (double pixel : row) {
-                    if (pixel > colorThreshold) countAboveThreshold++;
+                for (int i = 0; i < rowLength / 2; i++) {
+                    if (row[i] > colorThreshold) leftCount++;
+                }
+                for (int i = rowLength / 2; i < rowLength; i++) {
+                    if (row[i] > colorThreshold) rightCount++;
                 }
             }
 
-            if (countAboveThreshold > 0.05 * filteredDataSize && countAboveThreshold > 1.5 * lastCountAboveThreshold) {
-                return true;
-            }
+            if (leftCount > 0.05 * halfImageSize && leftCount > 1.5 * lastLeftCount) return 0;
+            if (rightCount > 0.05 * halfImageSize && rightCount > 1.5 * lastRightCount) return 1;
 
             colorThreshold -= 5;
         }
 
-        return false;
+        return 2;
     }
 }

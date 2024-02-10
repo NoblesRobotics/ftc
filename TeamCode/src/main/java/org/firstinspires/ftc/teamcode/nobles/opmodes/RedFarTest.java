@@ -4,46 +4,46 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.nobles.AttributeTelemetry;
+import org.firstinspires.ftc.teamcode.nobles.findblock.BlockFinder;
 import org.firstinspires.ftc.teamcode.nobles.slide.SlideAssembly;
 import org.firstinspires.ftc.teamcode.nobles.swerve.AutoSwerveDrive;
 
 @TeleOp
-public class FarTest extends LinearOpMode {
+public class RedFarTest extends LinearOpMode {
     private SlideAssembly assembly;
 
     @Override
     public void runOpMode() {
         AttributeTelemetry.setTelemetry(telemetry);
 
-        AutoSwerveDrive drive = new AutoSwerveDrive(hardwareMap, 108, 8.75, 1);
+        AutoSwerveDrive drive = new AutoSwerveDrive(hardwareMap, 108, 8.75, -1);
         drive.calibrateServos();
         assembly = new SlideAssembly(hardwareMap);
+        assembly.setFlaps(false);
+        assembly.getActionQueuer().idleOnBusy();
+        BlockFinder blockFinder = new BlockFinder(hardwareMap, false);
 
         waitForStart();
 
-        int blockPosition = 2;
+        int blockPosition = 2 - blockFinder.getBlockPosition();
+        AttributeTelemetry.set("Block Position", String.valueOf(blockPosition));
+
+        drive.setAngle(-90);
+        drive.drive(6);
+        drive.turn(180);
+        drive.snapPosition(108, 14.75);
 
         if (blockPosition == 0) {
             drive.driveToPosition(108, 36);
-            drive.turn(-90);
-            drive.driveToPosition(104.75, 36);
+            drive.driveToPosition(104.75 - 17, 36);
             dumpToScore();
-            drive.driveToPosition(108,36);
-            drive.turn(90);
         } else if (blockPosition == 1) {
-            drive.driveToPosition(106, 48);
+            drive.driveToPosition(108, 48);
             dumpToScore();
         } else if (blockPosition == 2) {
-            drive.driveToPosition(111.25, 36);
+            drive.driveToPosition(110.25, 36);
             dumpToScore();
         }
-        drive.driveToPosition(108, 60);
-        drive.driveToPosition(24, 60);
-        drive.driveToPosition(22.5, 36);
-        drive.turn(90);
-        drive.driveToDistance(2);
-        placeToScore();
-        drive.driveToPosition(22.5, 12);
         drive.resetServos();
     }
 

@@ -20,6 +20,7 @@ public class SlideAssembly {
         rightFlap = hardwareMap.get(Servo.class, "servo6");
         leftFlap = hardwareMap.get(Servo.class, "servo7");
         pivot = hardwareMap.get(Servo.class, "servo8");
+        pivot.setPosition(0.33);
         intake = hardwareMap.get(DcMotorEx.class, "motor6");
         intakeRoller = hardwareMap.get(CRServo.class, "servo5");
     }
@@ -29,13 +30,13 @@ public class SlideAssembly {
     public void setFlaps(boolean setToOpen) {
         if (setToOpen) {
             actionQueuer.add(
-                    new ActionQueuer.ServoAction(leftFlap, 0.8, 0),
-                    new ActionQueuer.ServoAction(rightFlap, 0.385, 500)
+                    new ActionQueuer.ServoAction(leftFlap, 0.653, 0),
+                    new ActionQueuer.ServoAction(rightFlap, 0.147, 500)
             );
         } else {
             actionQueuer.add(
-                    new ActionQueuer.ServoAction(leftFlap, 0.84, 0),
-                    new ActionQueuer.ServoAction(rightFlap, 0.345, 500)
+                    new ActionQueuer.ServoAction(leftFlap, 0.502, 0),
+                    new ActionQueuer.ServoAction(rightFlap, 0, 500)
             );
         }
         flapsOpen = setToOpen;
@@ -50,7 +51,7 @@ public class SlideAssembly {
         if (flapsOpen) setFlaps(false);
         actionQueuer.add(
                 new ActionQueuer.SlideAction(slide, slidePosition),
-                new ActionQueuer.ServoAction(pivot, 0.686, 500)
+                new ActionQueuer.ServoAction(pivot, 0.6, 500)
         );
     }
 
@@ -61,7 +62,7 @@ public class SlideAssembly {
     public void lowerAssembly(int slidePosition) {
         if (flapsOpen) setFlaps(false);
         actionQueuer.add(
-                new ActionQueuer.ServoAction(pivot, 0.453, 500),
+                new ActionQueuer.ServoAction(pivot, 0.33, 500),
                 new ActionQueuer.SlideAction(slide, slidePosition)
         );
         if (!flapsOpen) setFlaps(true);

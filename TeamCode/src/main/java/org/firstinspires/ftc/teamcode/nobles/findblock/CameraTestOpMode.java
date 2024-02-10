@@ -20,7 +20,7 @@ public class CameraTestOpMode extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            AttributeTelemetry.set("Block Detected", String.valueOf(blockFinder.isBlockDetected()));
+            AttributeTelemetry.set("Block Detected", String.valueOf(blockFinder.getBlockPosition()));
         }
     }
 }
