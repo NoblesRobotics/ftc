@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.nobles.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.nobles.AttributeTelemetry;
 import org.firstinspires.ftc.teamcode.nobles.findblock.BlockFinder;
@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.nobles.slide.SlideAssembly;
 import org.firstinspires.ftc.teamcode.nobles.swerve.AutoSwerveDrive;
 import org.firstinspires.ftc.teamcode.nobles.swerve.SwerveServoStorage;
 
-@TeleOp
-public class BlueCloseTest extends LinearOpMode {
+@Autonomous
+public class BlueClosePark extends LinearOpMode {
     private SlideAssembly assembly;
 
     @Override
@@ -36,6 +36,7 @@ public class BlueCloseTest extends LinearOpMode {
         assembly.setIntakePower(0);*/
 
         int blockPosition = blockFinder.getBlockPosition();
+        AttributeTelemetry.set("Block Position", String.valueOf(blockPosition));
 
         if (blockPosition == 0) {
             drive.driveToPosition(38.25, 39.25);
@@ -54,7 +55,7 @@ public class BlueCloseTest extends LinearOpMode {
         //drive.turn(0);
         //drive.setAngle(0);
         drive.driveToDistance(2);
-        placeToScore();
+        //placeToScore();
         drive.driveToPosition(25, 12);
         drive.resetServos();
     }

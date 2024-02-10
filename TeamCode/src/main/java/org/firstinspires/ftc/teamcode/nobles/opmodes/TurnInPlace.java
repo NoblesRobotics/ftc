@@ -31,7 +31,7 @@ public class TurnInPlace extends LinearOpMode {
         climber.setTargetPosition(0);
         climber.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         climber.setPower(1);
-        int climberPosition = 1700;
+        int climberPosition = 0;
 
         waitForStart();
 

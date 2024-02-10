@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.nobles.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -7,18 +8,16 @@ import org.firstinspires.ftc.teamcode.nobles.AttributeTelemetry;
 import org.firstinspires.ftc.teamcode.nobles.findblock.BlockFinder;
 import org.firstinspires.ftc.teamcode.nobles.slide.SlideAssembly;
 import org.firstinspires.ftc.teamcode.nobles.swerve.AutoSwerveDrive;
-import org.firstinspires.ftc.teamcode.nobles.swerve.SwerveServoStorage;
 
-@TeleOp
-public class RedCloseTest extends LinearOpMode {
+@Autonomous
+public class BlueFar extends LinearOpMode {
     private SlideAssembly assembly;
 
     @Override
     public void runOpMode() {
-        SwerveServoStorage.hasCachedPositions = false;
         AttributeTelemetry.setTelemetry(telemetry);
 
-        AutoSwerveDrive drive = new AutoSwerveDrive(hardwareMap, 60, 8.75, -1);
+        AutoSwerveDrive drive = new AutoSwerveDrive(hardwareMap, 108, 8.75, 1);
         drive.calibrateServos();
         assembly = new SlideAssembly(hardwareMap);
         assembly.setFlaps(false);
@@ -27,46 +26,32 @@ public class RedCloseTest extends LinearOpMode {
 
         waitForStart();
 
-        int blockPosition = 2 - blockFinder.getBlockPosition();
+        int blockPosition = blockFinder.getBlockPosition();
         AttributeTelemetry.set("Block Position", String.valueOf(blockPosition));
 
-        drive.setAngle(-90);
-        drive.drive(6);
-        drive.turn(180);
-        drive.snapPosition(60, 14.75);
-
         if (blockPosition == 0) {
-            drive.driveToPosition(38.25, 39.25);
+            drive.driveToPosition(108, 36);
+            drive.driveToPosition(104.75 - 17, 36);
             dumpToScore();
-            drive.driveToPosition(22.5, 29.75);
         } else if (blockPosition == 1) {
-            drive.driveToPosition(51.25, 48);
+            drive.driveToPosition(108, 48);
             dumpToScore();
-            drive.driveToPosition(22.5, 38);
         } else if (blockPosition == 2) {
-            drive.driveToPosition(60, 30);
-            drive.driveToPosition(63.25, 38.25);
+            drive.driveToPosition(110.25, 36);
             dumpToScore();
-            drive.driveToPosition(22.5, 43.25);
         }
-        drive.driveToDistance(2);
-        placeToScore();
-        drive.driveToPosition(25, 12);
         drive.resetServos();
     }
 
     private void dumpToScore() {
-        assembly.setIntakePower(-0.2);
+        assembly.setIntakePower(-0.1);
         sleep(1000);
         assembly.setIntakePower(0);
     }
 
     private void placeToScore() {
         assembly.raiseAssembly(1400);
-        assembly.getActionQueuer().idleOnBusy();
         assembly.setFlaps(true);
-        assembly.getActionQueuer().idleOnBusy();
         assembly.lowerAssembly();
-        assembly.getActionQueuer().idleOnBusy();
     }
 }

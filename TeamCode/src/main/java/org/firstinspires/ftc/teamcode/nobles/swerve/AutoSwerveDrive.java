@@ -141,7 +141,7 @@ public class AutoSwerveDrive extends SwerveDrive {
             double headingError = deltaAngle(imu.getAngle(), targetAngle) / 90;
             //double headingPower = pid.update(headingError);
             double headingOffset = deltaAngle(imu.getAngle(), targetAngle);
-            double headingPower = Math.abs(headingOffset) > 5 ? Math.signum(headingOffset) * 0.4 : 0;
+            double headingPower = Math.abs(headingOffset) > 5 ? Math.signum(headingOffset) * 0.35 : 0;
             System.out.println(headingOffset + " " + headingPower);
 
             for (SwerveModule module : modules) {
